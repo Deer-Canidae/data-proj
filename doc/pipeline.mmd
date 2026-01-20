@@ -1,0 +1,23 @@
+flowchart TB
+  raw_ner[(ner infered tags)]
+  sha_fix[fixing sha512 field]
+  wp_merge[undo word piece]
+
+  raw_onet_tokens[(tagger tokens)]
+  raw_onet_texts[(tagger source texts)]
+  position_matcher[matching token position in text]
+
+  src_merger[merging data sources]
+
+  output_data[(merged outputs)]
+
+  raw_ner --> sha_fix
+  sha_fix --> wp_merge
+
+  raw_onet_tokens --> position_matcher
+  raw_onet_texts --> position_matcher
+
+  wp_merge --> src_merger
+  position_matcher --> src_merger
+
+  src_merger --> output_data
