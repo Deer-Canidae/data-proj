@@ -7,9 +7,8 @@ from dfio import (
     TextToNerPositions,
     df_to_dict,
     NerPositionsMatch,
-    NerPositionsMatchT,
 )
-from typing import Any, Optional, Required, Self, TextIO, TypedDict, cast, TypeVar
+from typing import Optional, Required, Self, TextIO, cast, TypeVar
 
 T = TypeVar("T")
 
@@ -104,11 +103,11 @@ class TagSourceStatistic:
         print("tag per source:", file=file)
         for src, src_count in sort_dict_items(self.src_tag_count):
             print(f'\t"{src}": {src_count}', file=file)
-        print("tag prefix per source:")
-        for src, src_prefix_dict in sort_dict_items(self.src_tag_type_count):
-            print(f'\t"{src}":', file=file)
-            for src_prefix, src_prefix_count in sort_dict_items(src_prefix_dict):
-                print(f'\t\t"{src_prefix}": {src_prefix_count}')
+        # print("tag prefix per source:")
+        # for src, src_prefix_dict in sort_dict_items(self.src_tag_type_count):
+        #     print(f'\t"{src}":', file=file)
+        #     for src_prefix, src_prefix_count in sort_dict_items(src_prefix_dict):
+        #         print(f'\t\t"{src_prefix}": {src_prefix_count}')
 
 
 if __name__ == "__main__":

@@ -68,8 +68,8 @@ def smart_tag_merge(
 
 
 def _before_match(
-    ref: dfio.NerPositionsMatchT,
-) -> Callable[[dfio.NerPositionsMatchT], bool]:
+    ref: dfio.NerPositionsMatch,
+) -> Callable[[dfio.NerPositionsMatch], bool]:
     return lambda m: m["char_start"] < ref["char_start"]
 
 

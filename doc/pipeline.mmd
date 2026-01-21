@@ -6,6 +6,7 @@ flowchart TB
   raw_onet_tokens[(tagger tokens)]
   raw_onet_texts[(tagger source texts)]
   position_matcher[matching token position in text]
+  tag_prefix_strip[stripping BILOU prefix]
 
   src_merger[merging data sources]
 
@@ -18,6 +19,8 @@ flowchart TB
   raw_onet_texts --> position_matcher
 
   wp_merge --> src_merger
-  position_matcher --> src_merger
+  position_matcher --> tag_prefix_strip
+
+  tag_prefix_strip --> src_merger
 
   src_merger --> output_data

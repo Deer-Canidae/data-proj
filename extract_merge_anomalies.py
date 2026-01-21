@@ -5,8 +5,10 @@ import dfio
 from merge_stats import (
     NerPositionMatchSourced,
     TextToNerPositionsSourced,
+    cast_text_to_ner_position_sourced,
 )
 from sys import exit, argv
+from typing import cast
 
 
 def extract_merge_anomalies(
@@ -46,11 +48,14 @@ if __name__ == "__main__":
     input_df = pandas.read_csv(argv[1])
 
     input_dict = dfio.df_to_dict(input_df)
+    input_dict_cast = cast_text_to_ner_position_sourced(input_dict)
+    if input_dict_cast is None:
+        raise ValueError("input data does not contain a src field")
 
-    extracted = extract_merge_anomalies(input_dict)
+    extracted = extract_merge_anomalies(input_dict_cast)
 
     collapse_empty_texts(extracted)
 
-    output_df = dfio.dict_to_df(extracted)
+    output_df = dfio.dict_to_df(cast(dfio.TextToNerPositions, extracted))
 
     output_df.to_csv(argv[2], index=False)

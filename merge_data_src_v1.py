@@ -29,7 +29,7 @@ def df_to_dict(df: pandas.DataFrame, src_name: str) -> TextLabelDict:
                 str(row["ner_positions"])
             )
             df_labels_flattened = flatten_df_labels(df_labels, src_name)
-        except:  # noqa: E722 permet d'ignorer les lognes malformatees
+        except:  # noqa: E722 permet d'ignorer les lignes malformatees
             continue
 
         merged = merge_tag_set(label_dict, df_labels_flattened)

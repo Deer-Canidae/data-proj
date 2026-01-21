@@ -6,7 +6,7 @@ if __name__ == "__main__":
     raise RuntimeError("This module is not intended to be executed directly")
 
 from ast import literal_eval
-from typing import Any, Optional, Required, TypeVar, TypedDict, cast
+from typing import Any, Optional, Required, TypedDict, cast
 from itertools import tee
 
 import pandas
@@ -18,14 +18,14 @@ class NerPositionsMatch(TypedDict):
     char_end: Required[int]
 
 
-NerPositionsMatchT = TypeVar("NerPositionsMatchT", bound=NerPositionsMatch)
+# NerPositionsMatchT = TypeVar("NerPositionsMatchT", bound=NerPositionsMatch)
 
 
 # class NerPositionMatchExtra(NerPositionsMatch):
 #     __extra_items__: Any
 
 
-NerPositions = dict[str, list[NerPositionsMatchT]]
+NerPositions = dict[str, list[NerPositionsMatch]]
 TextToNerPositions = dict[str, NerPositions]
 
 

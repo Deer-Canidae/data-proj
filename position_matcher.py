@@ -7,6 +7,7 @@ import pandas as pd
 from typing import Iterable, Optional, TypeVar
 from itertools import tee
 from tqdm import tqdm
+from sys import argv
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -126,16 +127,17 @@ def textmatch_to_df(text_match: TextMatch) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
+    if len(argv) != 4:
+        raise ValueError("check script usage")
+
     ## Aquiring data sources
     reference_texts = pd.read_csv(
-        "./data/offre_all_v2_ner_commodity_title_concatenated.csv",
+        argv[1],
         sep=";",
         encoding="utf-8",
     )
 
-    ner_matches = pd.read_csv(
-        "./data/offre_all_v2_ner_commodity_title.csv", sep=";", encoding="utf-8"
-    )
+    ner_matches = pd.read_csv(argv[2], sep=";", encoding="utf-8")
 
     ## Data cleanup
 
@@ -159,4 +161,4 @@ if __name__ == "__main__":
     ## Output
 
     df_out = textmatch_to_df(output_dict)
-    df_out.to_csv("./data/out.csv", sep=",", encoding="utf-8", index=False)
+    df_out.to_csv(argv[3], sep=",", encoding="utf-8", index=False)
