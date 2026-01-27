@@ -4,7 +4,7 @@ This module aims to find the position of matches within a body of texts
 """
 
 import pandas as pd
-from typing import Iterable, Optional, TypeVar
+from typing import Iterable, Optional, TypeVar, cast
 from itertools import tee
 from tqdm import tqdm
 from sys import argv
@@ -40,7 +40,13 @@ def find_next_match(
         return (index, index + len(match_value))
 
 
-def find_match_position(ner_matches: pd.DataFrame, reference_texts) -> TextMatch:
+def find_match_position_single_text():
+    pass
+
+
+def find_match_position(
+    ner_matches: pd.DataFrame, reference_texts: pd.DataFrame
+) -> TextMatch:
     """
     Finds the position of every match of `ner_matches` within the texts of `reference_texts`.
 
@@ -54,32 +60,30 @@ def find_match_position(ner_matches: pd.DataFrame, reference_texts) -> TextMatch
     """
     result: TextMatch = dict()
     # the reference texts are expected to have unique sha512s
-    for ref_text_row in tqdm(
-        reference_texts.itertuples(),
+    for text_id, text_content in tqdm(
+        reference_texts[["sha512", "description"]].itertuples(index=False, name=None),
         desc="Finding match location",
         unit="texts",
         total=len(reference_texts),
     ):
-        text_id = str(ref_text_row.sha512)
-        text_content = str(ref_text_row.description)
-
-        matches_in_text = ner_matches[ner_matches["sha512"] == text_id]
+        matches_in_text = cast(
+            pd.DataFrame, ner_matches[ner_matches["sha512"] == text_id]
+        )
 
         match_list: list[MatchData] = result.setdefault(text_id, [])
 
         current_index = 0
-        for _, match_row in matches_in_text.iterrows():
-            word = str(match_row["word"])
+        for word, tag in matches_in_text[["word", "ner"]].itertuples(
+            index=False, name=None
+        ):
             match_position = find_next_match(text_content, word, current_index)
 
             if match_position is None:
                 continue
             (_, current_index) = match_position
 
-            tag = str(match_row["ner"])
-
             match tag:
-                case "" | "0" | "O":
+                case "" | "O":
                     continue
                 case _:
                     pass
@@ -131,34 +135,34 @@ if __name__ == "__main__":
         raise ValueError("check script usage")
 
     ## Aquiring data sources
-    reference_texts = pd.read_csv(
-        argv[1],
-        sep=";",
-        encoding="utf-8",
-    )
+    reference_texts = pd.read_csv(argv[1], sep=";", encoding="utf-8", low_memory=False)
 
-    ner_matches = pd.read_csv(argv[2], sep=";", encoding="utf-8")
+    ner_matches = pd.read_csv(argv[2], sep=";", encoding="utf-8", low_memory=False)
 
     ## Data cleanup
 
-    del reference_texts["label"]
-    del reference_texts["crc32"]
+    ner_matches = cast(pd.DataFrame, ner_matches[["sha512", "word", "ner"]])
+    reference_texts = cast(pd.DataFrame, reference_texts[["sha512", "description"]])
 
-    reference_texts = reference_texts[
-        reference_texts["description"].notnull()
-        | reference_texts["description"].notna()
-    ]
-    # expected columns: sha512, description
+    ner_matches = ner_matches.astype({"sha512": str, "word": str, "ner": str})
+    reference_texts = reference_texts.astype({"sha512": str, "description": str})
 
-    del ner_matches["pos"]
-    del ner_matches["chunk"]
-    # expected columns: sha512, word, ner
+    reference_texts = cast(
+        pd.DataFrame,
+        reference_texts[
+            reference_texts["description"].notnull()
+            | reference_texts["description"].notna()
+        ],
+    )
 
     ## Processing
 
     output_dict = find_match_position(ner_matches, reference_texts)
+    ner_matches = None  # allows GC to free memory
+    reference_texts = None
 
     ## Output
 
     df_out = textmatch_to_df(output_dict)
+    output_dict = None
     df_out.to_csv(argv[3], sep=",", encoding="utf-8", index=False)

@@ -166,7 +166,16 @@ def tag_conflict_error_to_df(tag_conflict: dict[str, ConflictError]) -> pd.DataF
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("./data/overlap.csv")
+    import sys
+
+    if len(sys.argv) != 3:
+        print(f"usage: {sys.argv[0]} input.csv output.csv", file=sys.stderr)
+        sys.exit(1)
+
+    input_path = sys.argv[1]
+    output_path = sys.argv[2]
+
+    df = pd.read_csv(input_path)
 
     input = load_text_overlaps(df)
     df = None
@@ -183,6 +192,4 @@ if __name__ == "__main__":
     df = tag_conflict_error_to_df(accounted_error)
     accounted_error = None
 
-    df.to_csv(
-        "./data/colision_compabilized.csv", index=False, sep=";", encoding="utf-8"
-    )
+    df.to_csv(output_path, index=False, sep=";", encoding="utf-8")
